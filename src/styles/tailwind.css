@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Persian numeric font (Kalameh) */
+@font-face {
+  font-family: 'KalamehFaNum';
+  src: url('../src/assets/fonts/KalamehWebFaNum-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KalamehFaNum';
+  src: url('../src/assets/fonts/KalamehWebFaNum-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KalamehFaNum';
+  src: url('../src/assets/fonts/KalamehWebFaNum-Black.woff2') format('woff2'),
+       url('../src/assets/fonts/KalamehWebFaNum-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Alias family name 'Kalameh' for title usage */
+@font-face {
+  font-family: 'Kalameh';
+  src: url('../src/assets/fonts/KalamehWebFaNum-Black.woff2') format('woff2'),
+       url('../src/assets/fonts/KalamehWebFaNum-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  html { font-family: 'KalamehFaNum', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+  h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "basalam-calculator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "node scripts/e2e.puppeteer.mjs",
+    "build": "npm run -s tw:build && node scripts/bundle.mjs",
+    "tw:build": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/tailwind.css --minify",
+    "mcp:puppeteer": "mcp-server-puppeteer --stdio"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/server-puppeteer": "^2025.5.12",
+    "esbuild": "^0.25.12",
+    "puppeteer": "^24.28.0",
+    "tailwindcss": "^3.4.17",
+    "vue": "^3.5.22"
+  }
+}
