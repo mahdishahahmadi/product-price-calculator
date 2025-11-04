@@ -19,7 +19,7 @@ export default defineComponent({
 
     const filtered = computed(() => {
       const q = (search.value || '').trim();
-      if (!q) return props.categories.slice(0, 50);
+      if (!q) return props.categories.slice(0, 450);
       const lowerQ = q.toLowerCase();
       // Persian-aware search: test raw and lowercased
       return props.categories.filter(c => c.includes(q) || c.toLowerCase().includes(lowerQ)).slice(0, 30);
@@ -70,23 +70,13 @@ export default defineComponent({
         @focus="open = true"
         class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
       />
-      <!-- Mobile dropdown -->
-      <div v-if="open && showList" class="md:hidden absolute right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-gray-200 bg-white shadow">
+      <!-- Dropdown (all breakpoints) -->
+      <div v-if="open && showList" class="absolute right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-gray-200 bg-white shadow">
         <button v-for="c in filtered" :key="c" type="button" @mousedown.prevent="select(c)" class="w-full text-right px-3 py-2 hover:bg-gray-100 text-sm">{{ c }}</button>
         <div v-if="filtered.length === 0" class="text-gray-400 px-3 py-2">موردی یافت نشد</div>
       </div>
-      <!-- Desktop chips -->
-      <div v-if="showList" class="hidden md:flex mt-2 flex-wrap gap-2 max-h-40 overflow-auto">
-        <button 
-          v-for="c in filtered" :key="c" 
-          @click="select(c)"
-          type="button"
-          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-gray-700 shadow-sm hover:bg-gray-100 text-sm"
-        >
-          {{ c }}
-        </button>
-        <div v-if="filtered.length === 0" class="text-gray-400 px-3 py-2">موردی یافت نشد</div>
-      </div>
+      <!-- Chip list hidden (dropdown used everywhere) -->
+      <div v-if="showList" class="hidden"></div>
     </div>
   `
 });

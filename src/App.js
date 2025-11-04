@@ -1,4 +1,4 @@
-import { defineComponent } from '../node_modules/vue/dist/vue.esm-browser.prod.js';
+import { defineComponent, ref } from '../node_modules/vue/dist/vue.esm-browser.prod.js';
 import { useCalculator } from './composables/useCalculator.js';
 import CalculatorForm from './components/CalculatorForm.js';
 import CategorySelector from './components/CategorySelector.js';
@@ -9,18 +9,33 @@ export default defineComponent({
   components: { CalculatorForm, CategorySelector, ResultDisplay },
   setup() {
     const { inputs, categories, calculationResult, currentCommissionRate, saleMode } = useCalculator();
+    const formKey = ref(0);
+    const categoryKey = ref(0);
+
+    const clearAll = () => {
+      inputs.purchasePrice = 0;
+      inputs.shippingCost = 0;
+      inputs.otherCosts = 0;
+      inputs.otherCostsMode = 'absolute';
+      inputs.profitMarginPercent = 20;
+      inputs.profitMode = 'percent';
+      inputs.selectedCategory = 'انتخاب کنید';
+      // Re-mount form and category selector to reset their internal states
+      formKey.value++;
+      categoryKey.value++;
+    };
     if (typeof window !== 'undefined') {
       // expose for E2E debug
       window.__calc = { inputs, calculationResult, currentCommissionRate, saleMode };
     }
-    return { inputs, categories, calculationResult, currentCommissionRate, saleMode };
+    return { inputs, categories, calculationResult, currentCommissionRate, saleMode, clearAll, formKey, categoryKey };
   },
   template: `
     <div class="max-w-5xl mx-auto p-4">
       <div class="text-right md:text-center">
         <h1 class="relative inline-flex items-center gap-2 md:gap-3 font-black text-[18px] md:text-[20px] mt-[8px] md:mt-[10px] mb-[16px] md:mb-[20px]" style="font-family: 'KalamehFaNum', sans-serif;">
           <img src="src/assets/logo.png" alt="لوگو" class="shrink-0 w-12 h-12 md:w-10 md:h-10" />
-          <span class="relative block md:w-[600px]" style="margin:0;font-size:20px;font-weight:900;font-family:'Kalameh', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;">قیمت‌یار | ماشین‌حساب قیمت‌گذاری محصولات باسلام</span>
+          <span class="relative inline-block" style="font-size:20px;font-weight:900;font-family:'Kalameh', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;">قیمت‌یار | ماشین‌حساب قیمت‌گذاری محصولات باسلام</span>
         </h1>
       </div>
 
@@ -45,6 +60,7 @@ export default defineComponent({
           <div class="mb-5">
             <label class="block text-sm text-gray-500 mb-1">انتخاب دسته‌بندی محصول</label>
             <CategorySelector 
+              :key="categoryKey"
               v-model="inputs.selectedCategory" 
               :categories="categories" />
           </div>
@@ -66,11 +82,11 @@ export default defineComponent({
           </div>
 
           <!-- فرم محاسبه -->
-          <CalculatorForm :modelValue="inputs" @update:modelValue="val => Object.assign(inputs, val)" />
+          <CalculatorForm :key="formKey" :modelValue="inputs" @update:modelValue="val => Object.assign(inputs, val)" />
 
           <!-- نتیجه -->
           <div class="mt-4 md:mt-4">
-            <ResultDisplay :result="calculationResult" />
+            <ResultDisplay :result="calculationResult" @clear-all="clearAll" />
           </div>
       </div>
     </div>

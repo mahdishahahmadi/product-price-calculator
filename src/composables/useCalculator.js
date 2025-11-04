@@ -10,7 +10,9 @@ export function useCalculator() {
     purchasePrice: 0,
     shippingCost: 0,
     otherCosts: 0,
+    otherCostsMode: 'absolute', // 'absolute' | 'percent'
     profitMarginPercent: 20,
+    profitMode: 'percent', // 'percent' | 'absolute'
     selectedCategory: 'انتخاب کنید',
   });
 
@@ -28,7 +30,9 @@ export function useCalculator() {
     purchasePrice: 0,
     shippingCost: 0,
     otherCosts: 0,
+    otherCostsMode: 'absolute',
     profitMarginPercent: 20,
+    profitMode: 'percent',
     selectedCategory: 'انتخاب کنید',
   });
   let debounceTimer = null;
@@ -52,12 +56,24 @@ export function useCalculator() {
         return { price: 0, error: null };
       }
       const price = calculatorService.calculateFinalPrice(calculatorInput);
+      // کارمزد باسلام نسبت به قیمت نهایی
       const commissionAmount = Math.round(price * calculatorInput.commissionRate);
-      const profitAmount = Math.round(price * (calculatorInput.profitMarginPercent / 100));
+      // حاشیه سود: اگر درصدی باشد نسبت به قیمت خرید، وگرنه عدد ثابت
+      const profitAmount = Math.round(
+        debouncedInputs.profitMode === 'percent'
+          ? (debouncedInputs.purchasePrice || 0) * ((calculatorInput.profitMarginPercent || 0) / 100)
+          : Number(calculatorInput.profitMarginPercent || 0)
+      );
+      // سایر هزینه‌ها: اگر درصدی باشد، بر مبنای قیمت خرید محاسبه می‌شود
+      const otherAmount = Math.round(
+        debouncedInputs.otherCostsMode === 'percent'
+          ? (debouncedInputs.purchasePrice || 0) * ((debouncedInputs.otherCosts || 0) / 100)
+          : (debouncedInputs.otherCosts || 0)
+      );
       const breakdown = {
         purchase: Math.round(debouncedInputs.purchasePrice || 0),
         shipping: Math.round(debouncedInputs.shippingCost || 0),
-        other: Math.round(debouncedInputs.otherCosts || 0),
+        other: otherAmount,
         commission: commissionAmount,
         profit: profitAmount,
       };

@@ -1,19 +1,32 @@
 export class PriceCalculatorService {
-  calculateFinalPrice({ purchasePrice, shippingCost, otherCosts, profitMarginPercent, commissionRate }) {
-    const totalFixedCosts = Number(purchasePrice || 0) + Number(shippingCost || 0) + Number(otherCosts || 0);
-    const commissionPercent = Number(commissionRate || 0);
-    const profitPercent = Number(profitMarginPercent || 0) / 100;
+  // قوانین مالی:
+  // - کارمزد باسلام درصدی از قیمت نهایی محاسبه می‌شود.
+  // - حاشیه سود فقط درصدی از قیمت خرید یا عددی ثابت (بسته به حالت) محاسبه می‌شود.
+  // - سایر هزینه‌ها می‌تواند عددی ثابت یا درصدی از قیمت خرید باشد.
+  calculateFinalPrice({ purchasePrice, shippingCost, otherCosts, otherCostsMode, profitMarginPercent, profitMode, commissionRate }) {
+    const purchase = Number(purchasePrice || 0);
+    const shipping = Number(shippingCost || 0);
+    const otherVal = Number(otherCosts || 0);
+    const commissionPercent = Number(commissionRate || 0); // 0..1
+    const profitPercent = Number(profitMarginPercent || 0) / 100; // 0..1
 
-    const totalPercentages = commissionPercent + profitPercent;
-    if (totalPercentages >= 1) {
-      throw new Error('حاصل جمع کارمزد و سود نباید ۱۰۰٪ یا بیشتر باشد');
+    if (commissionPercent >= 1) {
+      throw new Error('کارمزد نباید ۱۰۰٪ یا بیشتر باشد');
     }
-    if (totalPercentages < 0) {
-      throw new Error('درصدها نمیتوانند منفی باشند');
+    if (commissionPercent < 0) {
+      throw new Error('درصدها نمی‌توانند منفی باشند');
     }
 
-    const finalPrice = totalFixedCosts / (1 - totalPercentages);
+    const otherAmount = otherCostsMode === 'percent' ? purchase * (otherVal / 100) : otherVal;
+    const profitAmount = profitMode === 'percent' ? (purchase * profitPercent) : Number(profitMarginPercent || 0);
+    if (profitMode === 'percent' && profitPercent < 0) {
+      throw new Error('درصدها نمی‌توانند منفی باشند');
+    }
+    if (profitMode === 'absolute' && profitAmount < 0) {
+      throw new Error('مقادیر نمی‌توانند منفی باشند');
+    }
+    const basePlusProfit = purchase + shipping + otherAmount + profitAmount;
+    const finalPrice = basePlusProfit / (1 - commissionPercent); // کمیسیون روی قیمت نهایی
     return Math.ceil(finalPrice);
   }
 }
-

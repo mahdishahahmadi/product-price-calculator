@@ -51,7 +51,12 @@ export default defineComponent({
         v = Number.isFinite(n) ? n : 0;
         // Update the visible input with grouped Persian digits
         if (evt && evt.target) {
-          evt.target.value = formatFaNumber(n);
+          let shouldFormat = true;
+          if (key === 'otherCosts' && this.modelValue.otherCostsMode === 'percent') shouldFormat = false;
+          if (key === 'profitMarginPercent' && this.modelValue.profitMode === 'percent') shouldFormat = false;
+          if (shouldFormat) {
+            evt.target.value = formatFaNumber(n);
+          }
         }
       }
       this.$emit('update:modelValue', { ...this.modelValue, [key]: v });
@@ -62,13 +67,34 @@ export default defineComponent({
         // اگر ارسال رایگان نیست (هزینه از مشتری گرفته می‌شود) مقدار هزینه برای فروشنده صفر است
         this.updateField('shippingCost', 0);
       }
+    },
+    setProfitMode(mode) {
+      const m = mode === 'absolute' ? 'absolute' : 'percent';
+      this.$emit('update:modelValue', { ...this.modelValue, profitMode: m });
+    },
+    setOtherCostsMode(mode) {
+      const m = mode === 'percent' ? 'percent' : 'absolute';
+      this.$emit('update:modelValue', { ...this.modelValue, otherCostsMode: m });
     }
   },
   template: `
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block text-xs md:text-sm text-gray-600 mb-1">قیمت خرید (تومان)</label>
-        <input class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20" type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*" :value="modelValue.purchasePrice > 0 ? modelValue.purchasePrice.toLocaleString('fa-IR') : ''" @input="updateField('purchasePrice', $event)" placeholder="0" />
+        <label class="block text-xs md:text-sm text-gray-600 mb-1">
+          قیمت خرید (تومان)
+          <span class="text-rose-500" aria-hidden="true">*</span>
+        </label>
+        <input 
+          class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20" 
+          type="text" 
+          inputmode="numeric" 
+          pattern="[0-9۰-۹٠-٩]*" 
+          required 
+          aria-required="true"
+          :value="modelValue.purchasePrice > 0 ? modelValue.purchasePrice.toLocaleString('fa-IR') : ''" 
+          @input="updateField('purchasePrice', $event)" 
+          placeholder="0" 
+        />
       </div>
       <div>
         <div class="mb-1">
@@ -92,12 +118,58 @@ export default defineComponent({
           :value="modelValue.shippingCost > 0 ? modelValue.shippingCost.toLocaleString('fa-IR') : ''" @input="updateField('shippingCost', $event)" placeholder="0" />
       </div>
       <div>
-        <label class="block text-xs md:text-sm text-gray-600 mb-1">سایر هزینه‌ها (تومان)</label>
-        <input class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20" type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*" :value="modelValue.otherCosts > 0 ? modelValue.otherCosts.toLocaleString('fa-IR') : ''" @input="updateField('otherCosts', $event)" placeholder="0" />
+        <div class="mb-1">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs md:text-sm text-gray-600">
+              {{ modelValue.otherCostsMode === 'percent' ? 'سایر هزینه‌ها (%)' : 'سایر هزینه‌ها (تومان)' }}
+            </label>
+            <div class="flex items-center gap-2 text-[11px] md:text-xs text-gray-600 select-none cursor-pointer">
+              <label class="inline-flex items-center gap-1">
+                <input type="radio" class="sr-only" name="otherMode" :checked="modelValue.otherCostsMode !== 'percent'" @change="setOtherCostsMode('absolute')" />
+                <span :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full border', modelValue.otherCostsMode !== 'percent' ? 'border-teal-300 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600']">عددی</span>
+              </label>
+              <label class="inline-flex items-center gap-1">
+                <input type="radio" class="sr-only" name="otherMode" :checked="modelValue.otherCostsMode === 'percent'" @change="setOtherCostsMode('percent')" />
+                <span :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full border', modelValue.otherCostsMode === 'percent' ? 'border-teal-300 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600']">درصدی</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <input 
+          class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
+          type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*"
+          :value="modelValue.otherCostsMode === 'percent' 
+            ? (modelValue.otherCosts != null && modelValue.otherCosts !== 0 ? String(modelValue.otherCosts) : '') 
+            : (modelValue.otherCosts > 0 ? modelValue.otherCosts.toLocaleString('fa-IR') : '')"
+          @input="updateField('otherCosts', $event)" 
+          :placeholder="modelValue.otherCostsMode === 'percent' ? '0' : '0'" />
       </div>
       <div>
-        <label class="block text-xs md:text-sm text-gray-600 mb-1">حاشیه سود (%)</label>
-        <input class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20" type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*" :value="modelValue.profitMarginPercent != null ? modelValue.profitMarginPercent.toLocaleString('fa-IR') : ''" @input="updateField('profitMarginPercent', $event)" placeholder="20" />
+        <div class="mb-1">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs md:text-sm text-gray-600">
+              {{ modelValue.profitMode === 'percent' ? 'حاشیه سود (%)' : 'حاشیه سود (تومان)' }}
+            </label>
+            <div class="flex items-center gap-2 text-[11px] md:text-xs text-gray-600 select-none cursor-pointer">
+              <label class="inline-flex items-center gap-1">
+                <input type="radio" class="sr-only" name="profitMode" :checked="modelValue.profitMode === 'percent'" @change="setProfitMode('percent')" />
+                <span :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full border', modelValue.profitMode === 'percent' ? 'border-teal-300 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600']">درصدی</span>
+              </label>
+              <label class="inline-flex items-center gap-1">
+                <input type="radio" class="sr-only" name="profitMode" :checked="modelValue.profitMode === 'absolute'" @change="setProfitMode('absolute')" />
+                <span :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full border', modelValue.profitMode === 'absolute' ? 'border-teal-300 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-600']">عددی</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <input 
+          class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
+          type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*"
+          :value="modelValue.profitMode === 'percent' 
+            ? (modelValue.profitMarginPercent != null && modelValue.profitMarginPercent !== 0 ? String(modelValue.profitMarginPercent) : '') 
+            : (modelValue.profitMarginPercent > 0 ? modelValue.profitMarginPercent.toLocaleString('fa-IR') : '')"
+          @input="updateField('profitMarginPercent', $event)"
+          :placeholder="modelValue.profitMode === 'percent' ? '20' : '0'" />
       </div>
     </div>
   `

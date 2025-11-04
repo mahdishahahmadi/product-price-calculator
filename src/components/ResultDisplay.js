@@ -13,6 +13,7 @@ export default defineComponent({
   props: {
     result: { type: Object, required: true }
   },
+  emits: ['clear-all'],
   computed: {
     hasError() { return !!(this.result && this.result.error); },
     priceText() { return formatPrice(this.result && this.result.price); },
@@ -31,6 +32,13 @@ export default defineComponent({
     <div>
       <div v-if="hasError" class="text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">{{ result.error }}</div>
       <div v-else>
+        <div class="flex justify-end mb-2">
+          <button type="button"
+            @click="$emit('clear-all')"
+            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs md:text-sm">
+            پاک کردن همه
+          </button>
+        </div>
         <div class="flex items-center justify-between p-4 rounded-xl border border-teal-200 bg-teal-50">
           <div class="text-gray-700">قیمت پیشنهادی فروش</div>
           <div class="text-3xl text-teal-700 tabular-nums">{{ priceText }} <span class="text-base text-gray-500">تومان</span></div>
