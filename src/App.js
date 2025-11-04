@@ -1,4 +1,4 @@
-import { defineComponent, ref } from '../node_modules/vue/dist/vue.esm-browser.prod.js';
+import { defineComponent, ref, onMounted, onBeforeUnmount } from '../node_modules/vue/dist/vue.esm-browser.prod.js';
 import { useCalculator } from './composables/useCalculator.js';
 import CalculatorForm from './components/CalculatorForm.js';
 import CategorySelector from './components/CategorySelector.js';
@@ -11,6 +11,30 @@ export default defineComponent({
     const { inputs, categories, calculationResult, currentCommissionRate, saleMode } = useCalculator();
     const formKey = ref(0);
     const categoryKey = ref(0);
+    const helpCategoryOpen = ref(false);
+    const categoryHelpRoot = ref(null);
+
+    const toggleCategoryHelp = () => {
+      helpCategoryOpen.value = !helpCategoryOpen.value;
+    };
+
+    let _onDocClick;
+    onMounted(() => {
+      _onDocClick = (e) => {
+        const el = categoryHelpRoot.value;
+        if (helpCategoryOpen.value && el && !el.contains(e.target)) {
+          helpCategoryOpen.value = false;
+        }
+      };
+      document.addEventListener('mousedown', _onDocClick);
+      document.addEventListener('touchstart', _onDocClick, { passive: true });
+    });
+    onBeforeUnmount(() => {
+      if (_onDocClick) {
+        document.removeEventListener('mousedown', _onDocClick);
+        document.removeEventListener('touchstart', _onDocClick);
+      }
+    });
 
     const clearAll = () => {
       inputs.purchasePrice = 0;
@@ -28,7 +52,7 @@ export default defineComponent({
       // expose for E2E debug
       window.__calc = { inputs, calculationResult, currentCommissionRate, saleMode };
     }
-    return { inputs, categories, calculationResult, currentCommissionRate, saleMode, clearAll, formKey, categoryKey };
+    return { inputs, categories, calculationResult, currentCommissionRate, saleMode, clearAll, formKey, categoryKey, helpCategoryOpen, toggleCategoryHelp, categoryHelpRoot };
   },
   template: `
     <div class="max-w-5xl mx-auto p-4">
@@ -58,8 +82,18 @@ export default defineComponent({
 
           <!-- جست‌وجوی دسته‌بندی (ادغام‌شده) -->
           <div class="mb-5">
-            <label class="block text-sm text-gray-500 mb-1">انتخاب دسته‌بندی محصول</label>
-                            <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-9">تعیین کنید محصول شما در کدام دسته‌بندی باسلام قرار می‌گیرد.</p>
+            <div class="relative inline-flex items-center gap-2 mb-1" ref="categoryHelpRoot">
+              <label class="block text-sm text-gray-500 m-0">انتخاب دسته‌بندی محصول</label>
+              <button type="button" aria-label="راهنما" @click="toggleCategoryHelp()"
+                class="inline-flex items-center justify-center w-5 h-5 text-teal-600 hover:text-teal-700">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9.14648 9.07361C9.31728 8.54732 9.63015 8.07896 10.0508 7.71948C10.4714 7.36001 10.9838 7.12378 11.5303 7.03708C12.0768 6.95038 12.6362 7.0164 13.1475 7.22803C13.6587 7.43966 14.1014 7.78875 14.4268 8.23633C14.7521 8.68391 14.9469 9.21256 14.9904 9.76416C15.0339 10.3158 14.9238 10.8688 14.6727 11.3618C14.4215 11.8548 14.0394 12.2685 13.5676 12.5576C13.0958 12.8467 12.5533 12.9998 12 12.9998V14.0002M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21ZM12.0498 17V17.1L11.9502 17.1002V17H12.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div v-if="helpCategoryOpen" class="absolute top-full mt-1 right-0 z-50 w-64 md:w-72 text-[11px] md:text-xs text-gray-600 bg-white border border-gray-200 rounded-lg shadow p-2">
+                کارمزد باسلام نسبت به قیمت نهایی فروش محصول محاسبه می‌شود.
+              </div>
+            </div>
 
             <CategorySelector 
               :key="categoryKey"
