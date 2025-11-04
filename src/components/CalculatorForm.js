@@ -81,8 +81,9 @@ export default defineComponent({
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="block text-xs md:text-sm text-gray-600 mb-1">
-          قیمت خرید (تومان)
+          قیمت پایه محصول (تومان)          
           <span class="text-rose-500" aria-hidden="true">*</span>
+          <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1">قیمت خرید یا هزینه تولید هر واحد محصول خود را وارد کنید.</span></p>
         </label>
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20" 
@@ -97,7 +98,7 @@ export default defineComponent({
         />
       </div>
       <div>
-        <div class="mb-1">
+        <div>
           <div class="flex items-center justify-between">
             <label class="block text-xs md:text-sm text-gray-600">هزینه ارسال (تومان)</label>
             <div class="flex items-center gap-2 text-[11px] md:text-xs text-gray-600 select-none cursor-pointer">
@@ -112,6 +113,8 @@ export default defineComponent({
             </div>
           </div>
         </div>
+
+            <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1">تعیین کنید هزینه ارسال را از مشتری می‌گیرید یا در قیمت محصول محاسبه می‌کنید؟ </span></p>
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed" 
           type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*" :disabled="!freeShipping"
@@ -135,6 +138,7 @@ export default defineComponent({
             </div>
           </div>
         </div>
+        <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1"> می‌توانید هزینه‌هایی مثل بسته‌بندی، کارتن، انبار یا نیروی انسانی را برای هر واحد محصول وارد کنید.</p>
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
           type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*"
@@ -162,6 +166,7 @@ export default defineComponent({
             </div>
           </div>
         </div>
+                <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1">درصد یا مبلغ سود مورد نظرتان را تعیین کنید (حاشیه سود شما نسبت به قیمت پایه محصول لحاظ می‌شود.)</p>
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
           type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*"
