@@ -10,7 +10,9 @@ RUN npm ci
 
 # Copy the rest of the project and build
 COPY . .
-RUN npm run build
+# Ensure optional public/ exists to avoid COPY failures later
+RUN mkdir -p public \
+  && npm run build
 
 # 2) Runtime stage: serve static files with Nginx
 FROM nginx:alpine AS runtime
@@ -20,8 +22,8 @@ WORKDIR /usr/share/nginx/html
 COPY --from=build /app/index.html ./
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/src/assets ./src/assets
-COPY --from=build /app/public ./ 2>/dev/null || true
+# Copy public directory contents (may be empty)
+COPY --from=build /app/public ./
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-
