@@ -1,0 +1,10 @@
+# Exclude files not needed for Docker build context
+.git
+.gitignore
+.DS_Store
+.chrome-data
+node_modules
+dist
+scripts/e2e.puppeteer.mjs
+commission.csv
+
