@@ -12,9 +12,17 @@ export default defineComponent({
     const open = ref(false);
     const root = ref(null);
 
-    // If parent passes in a selected value, reflect it in search for visibility
-    watch(() => props.modelValue, (val) => {
-      if (val && val !== 'انتخاب کنید' && search.value === '') search.value = val;
+    // Sync external model changes to local search string
+    watch(() => props.modelValue, (val, oldVal) => {
+      // When selection is cleared externally, reset local search
+      if (!val || val === 'انتخاب کنید') {
+        search.value = '';
+        return;
+      }
+      // When a real value is provided, reflect it only if user hasn't typed
+      if (search.value === '' || search.value === oldVal) {
+        search.value = val;
+      }
     }, { immediate: true });
 
     const filtered = computed(() => {
@@ -29,6 +37,11 @@ export default defineComponent({
       emit('update:modelValue', val);
       search.value = val;
       open.value = false;
+    };
+
+    const onInput = () => {
+      // Make sure dropdown is visible while typing
+      open.value = true;
     };
 
     const showList = computed(() => {
@@ -59,7 +72,7 @@ export default defineComponent({
       document.removeEventListener('keydown', onKey);
     });
 
-    return { search, filtered, select, showList, open, root };
+    return { search, filtered, select, showList, open, root, onInput };
   },
   template: `
     <div class="relative" ref="root">
@@ -68,11 +81,13 @@ export default defineComponent({
         placeholder="جستجوی دسته‌بندی..."
         v-model="search"
         @focus="open = true"
+        @input="onInput"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
         class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
       />
       <!-- Dropdown (all breakpoints) -->
       <div v-if="open && showList" class="absolute right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-gray-200 bg-white shadow">
-        <button v-for="c in filtered" :key="c" type="button" @mousedown.prevent="select(c)" class="w-full text-right px-3 py-2 hover:bg-gray-100 text-sm">{{ c }}</button>
+        <button v-for="c in filtered" :key="c" type="button" @click.prevent="select(c)" class="w-full text-right px-3 py-2 hover:bg-gray-100 text-sm">{{ c }}</button>
         <div v-if="filtered.length === 0" class="text-gray-400 px-3 py-2">موردی یافت نشد</div>
       </div>
       <!-- Chip list hidden (dropdown used everywhere) -->
