@@ -137,7 +137,7 @@ export default defineComponent({
       </div>
       <div>
         <div>
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between mb-2">
             <div class="relative inline-flex items-center gap-2">
               <label class="block text-xs md:text-sm text-gray-600">هزینه ارسال (تومان)</label>
               <button type="button" aria-label="راهنما" @click="toggleHelp('shipping')"
@@ -169,7 +169,7 @@ export default defineComponent({
           :value="modelValue.shippingCost > 0 ? modelValue.shippingCost.toLocaleString('fa-IR') : ''" @input="updateField('shippingCost', $event)" placeholder="0" />
       </div>
       <div>
-        <div class="mb-1">
+        <div class="mb-2">
           <div class="flex items-center justify-between">
             <div class="relative inline-flex items-center gap-2">
               <label class="block text-xs md:text-sm text-gray-600">
@@ -208,7 +208,7 @@ export default defineComponent({
           :placeholder="modelValue.otherCostsMode === 'percent' ? '0' : '0'" />
       </div>
       <div>
-        <div class="mb-1">
+        <div class="mb-2">
           <div class="flex items-center justify-between">
             <div class="relative inline-flex items-center gap-2">
               <label class="block text-xs md:text-sm text-gray-600">
