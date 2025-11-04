@@ -59,11 +59,14 @@ export default defineComponent({
           <!-- جست‌وجوی دسته‌بندی (ادغام‌شده) -->
           <div class="mb-5">
             <label class="block text-sm text-gray-500 mb-1">انتخاب دسته‌بندی محصول</label>
+                            <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-9">تعیین کنید محصول شما در کدام دسته‌بندی باسلام قرار می‌گیرد.</p>
+
             <CategorySelector 
               :key="categoryKey"
               v-model="inputs.selectedCategory" 
               :categories="categories" />
           </div>
+
 
           <!-- خلاصه دسته‌بندی انتخاب‌شده -->
           <div class="mb-4">

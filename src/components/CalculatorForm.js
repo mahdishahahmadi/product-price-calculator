@@ -34,6 +34,7 @@ export default defineComponent({
     return {
       // وقتی ارسال رایگان باشد، امکان وارد کردن هزینه‌ی ارسال وجود دارد
       freeShipping: false,
+      helpOpen: { purchase: false, shipping: false, other: false, profit: false },
     };
   },
   methods: {
@@ -75,16 +76,53 @@ export default defineComponent({
     setOtherCostsMode(mode) {
       const m = mode === 'percent' ? 'percent' : 'absolute';
       this.$emit('update:modelValue', { ...this.modelValue, otherCostsMode: m });
+    },
+    toggleHelp(key) {
+      const next = !this.helpOpen[key];
+      this.closeAllHelp();
+      this.helpOpen[key] = next;
+    },
+    closeAllHelp() {
+      this.helpOpen.purchase = false;
+      this.helpOpen.shipping = false;
+      this.helpOpen.other = false;
+      this.helpOpen.profit = false;
+    }
+  },
+  mounted() {
+    this._onDocClick = (e) => {
+      const root = this.$refs && this.$refs.root;
+      if (root && !root.contains(e.target)) this.closeAllHelp();
+    };
+    document.addEventListener('mousedown', this._onDocClick);
+    document.addEventListener('touchstart', this._onDocClick, { passive: true });
+  },
+  beforeUnmount() {
+    if (this._onDocClick) {
+      document.removeEventListener('mousedown', this._onDocClick);
+      document.removeEventListener('touchstart', this._onDocClick);
     }
   },
   template: `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div ref="root" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block text-xs md:text-sm text-gray-600 mb-1">
-          قیمت پایه محصول (تومان)          
-          <span class="text-rose-500" aria-hidden="true">*</span>
-          <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1">قیمت خرید یا هزینه تولید هر واحد محصول خود را وارد کنید.</span></p>
-        </label>
+        <div class="relative mb-1">
+          <label class="block text-xs md:text-sm text-gray-600">
+            <span class="inline-flex items-center gap-1">
+              <span>قیمت پایه محصول (تومان)</span>
+              <span class="text-rose-500" aria-hidden="true">*</span>
+              <button type="button" aria-label="راهنما" @click="toggleHelp('purchase')"
+                class="inline-flex items-center justify-center w-5 h-5 text-teal-600 hover:text-teal-700">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9.14648 9.07361C9.31728 8.54732 9.63015 8.07896 10.0508 7.71948C10.4714 7.36001 10.9838 7.12378 11.5303 7.03708C12.0768 6.95038 12.6362 7.0164 13.1475 7.22803C13.6587 7.43966 14.1014 7.78875 14.4268 8.23633C14.7521 8.68391 14.9469 9.21256 14.9904 9.76416C15.0339 10.3158 14.9238 10.8688 14.6727 11.3618C14.4215 11.8548 14.0394 12.2685 13.5676 12.5576C13.0958 12.8467 12.5533 12.9998 12 12.9998V14.0002M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21ZM12.0498 17V17.1L11.9502 17.1002V17H12.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </span>
+          </label>
+          <div v-if="helpOpen.purchase" class="absolute top-full mt-1 right-0 w-64 md:w-72 text-[11px] md:text-xs text-gray-600 bg-white border border-gray-200 rounded-lg shadow p-2">
+            قیمت خرید یا هزینه تولید هر واحد محصول خود را وارد کنید.
+          </div>
+        </div>
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20" 
           type="text" 
@@ -100,7 +138,18 @@ export default defineComponent({
       <div>
         <div>
           <div class="flex items-center justify-between">
-            <label class="block text-xs md:text-sm text-gray-600">هزینه ارسال (تومان)</label>
+            <div class="relative inline-flex items-center gap-2">
+              <label class="block text-xs md:text-sm text-gray-600">هزینه ارسال (تومان)</label>
+              <button type="button" aria-label="راهنما" @click="toggleHelp('shipping')"
+                class="inline-flex items-center justify-center w-5 h-5 text-teal-600 hover:text-teal-700">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9.14648 9.07361C9.31728 8.54732 9.63015 8.07896 10.0508 7.71948C10.4714 7.36001 10.9838 7.12378 11.5303 7.03708C12.0768 6.95038 12.6362 7.0164 13.1475 7.22803C13.6587 7.43966 14.1014 7.78875 14.4268 8.23633C14.7521 8.68391 14.9469 9.21256 14.9904 9.76416C15.0339 10.3158 14.9238 10.8688 14.6727 11.3618C14.4215 11.8548 14.0394 12.2685 13.5676 12.5576C13.0958 12.8467 12.5533 12.9998 12 12.9998V14.0002M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21ZM12.0498 17V17.1L11.9502 17.1002V17H12.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div v-if="helpOpen.shipping" class="absolute top-full mt-1 right-0 w-64 md:w-72 text-[11px] md:text-xs text-gray-600 bg-white border border-gray-200 rounded-lg shadow p-2">
+                تعیین کنید هزینه ارسال را از مشتری می‌گیرید یا در قیمت محصول محاسبه می‌کنید.
+              </div>
+            </div>
             <div class="flex items-center gap-2 text-[11px] md:text-xs text-gray-600 select-none cursor-pointer">
               <label class="inline-flex items-center gap-1">
                 <input type="radio" class="sr-only" name="shippingMode" :checked="!freeShipping" @change="setShippingMode(false)" />
@@ -113,8 +162,7 @@ export default defineComponent({
             </div>
           </div>
         </div>
-
-            <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1">تعیین کنید هزینه ارسال را از مشتری می‌گیرید یا در قیمت محصول محاسبه می‌کنید؟ </span></p>
+        
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed" 
           type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*" :disabled="!freeShipping"
@@ -123,9 +171,20 @@ export default defineComponent({
       <div>
         <div class="mb-1">
           <div class="flex items-center justify-between">
-            <label class="block text-xs md:text-sm text-gray-600">
-              {{ modelValue.otherCostsMode === 'percent' ? 'سایر هزینه‌ها (%)' : 'سایر هزینه‌ها (تومان)' }}
-            </label>
+            <div class="relative inline-flex items-center gap-2">
+              <label class="block text-xs md:text-sm text-gray-600">
+                {{ modelValue.otherCostsMode === 'percent' ? 'سایر هزینه‌ها (%)' : 'سایر هزینه‌ها (تومان)' }}
+              </label>
+              <button type="button" aria-label="راهنما" @click="toggleHelp('other')"
+                class="inline-flex items-center justify-center w-5 h-5 text-teal-600 hover:text-teal-700">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9.14648 9.07361C9.31728 8.54732 9.63015 8.07896 10.0508 7.71948C10.4714 7.36001 10.9838 7.12378 11.5303 7.03708C12.0768 6.95038 12.6362 7.0164 13.1475 7.22803C13.6587 7.43966 14.1014 7.78875 14.4268 8.23633C14.7521 8.68391 14.9469 9.21256 14.9904 9.76416C15.0339 10.3158 14.9238 10.8688 14.6727 11.3618C14.4215 11.8548 14.0394 12.2685 13.5676 12.5576C13.0958 12.8467 12.5533 12.9998 12 12.9998V14.0002M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21ZM12.0498 17V17.1L11.9502 17.1002V17H12.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div v-if="helpOpen.other" class="absolute top-full mt-1 right-0 w-64 md:w-72 text-[11px] md:text-xs text-gray-600 bg-white border border-gray-200 rounded-lg shadow p-2">
+                می‌توانید هزینه‌هایی مثل بسته‌بندی، کارتن، انبار یا نیروی انسانی را برای هر واحد محصول وارد کنید.
+              </div>
+            </div>
             <div class="flex items-center gap-2 text-[11px] md:text-xs text-gray-600 select-none cursor-pointer">
               <label class="inline-flex items-center gap-1">
                 <input type="radio" class="sr-only" name="otherMode" :checked="modelValue.otherCostsMode !== 'percent'" @change="setOtherCostsMode('absolute')" />
@@ -138,7 +197,7 @@ export default defineComponent({
             </div>
           </div>
         </div>
-        <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1"> می‌توانید هزینه‌هایی مثل بسته‌بندی، کارتن، انبار یا نیروی انسانی را برای هر واحد محصول وارد کنید.</p>
+        
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
           type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*"
@@ -151,9 +210,20 @@ export default defineComponent({
       <div>
         <div class="mb-1">
           <div class="flex items-center justify-between">
-            <label class="block text-xs md:text-sm text-gray-600">
-              {{ modelValue.profitMode === 'percent' ? 'حاشیه سود (%)' : 'حاشیه سود (تومان)' }}
-            </label>
+            <div class="relative inline-flex items-center gap-2">
+              <label class="block text-xs md:text-sm text-gray-600">
+                {{ modelValue.profitMode === 'percent' ? 'حاشیه سود (%)' : 'حاشیه سود (تومان)' }}
+              </label>
+              <button type="button" aria-label="راهنما" @click="toggleHelp('profit')"
+                class="inline-flex items-center justify-center w-5 h-5 text-teal-600 hover:text-teal-700">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9.14648 9.07361C9.31728 8.54732 9.63015 8.07896 10.0508 7.71948C10.4714 7.36001 10.9838 7.12378 11.5303 7.03708C12.0768 6.95038 12.6362 7.0164 13.1475 7.22803C13.6587 7.43966 14.1014 7.78875 14.4268 8.23633C14.7521 8.68391 14.9469 9.21256 14.9904 9.76416C15.0339 10.3158 14.9238 10.8688 14.6727 11.3618C14.4215 11.8548 14.0394 12.2685 13.5676 12.5576C13.0958 12.8467 12.5533 12.9998 12 12.9998V14.0002M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21ZM12.0498 17V17.1L11.9502 17.1002V17H12.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div v-if="helpOpen.profit" class="absolute top-full mt-1 right-0 w-64 md:w-72 text-[11px] md:text-xs text-gray-600 bg-white border border-gray-200 rounded-lg shadow p-2">
+                درصد یا مبلغ سود مورد نظرتان را تعیین کنید (حاشیه سود نسبت به قیمت پایه محصول لحاظ می‌شود.)
+              </div>
+            </div>
             <div class="flex items-center gap-2 text-[11px] md:text-xs text-gray-600 select-none cursor-pointer">
               <label class="inline-flex items-center gap-1">
                 <input type="radio" class="sr-only" name="profitMode" :checked="modelValue.profitMode === 'percent'" @change="setProfitMode('percent')" />
@@ -166,7 +236,6 @@ export default defineComponent({
             </div>
           </div>
         </div>
-                <p> <span class="text-gray-400 text-xs md:text-sm font-normal mt-1">درصد یا مبلغ سود مورد نظرتان را تعیین کنید (حاشیه سود شما نسبت به قیمت پایه محصول لحاظ می‌شود.)</p>
         <input 
           class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
           type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*"
