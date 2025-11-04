@@ -94,6 +94,7 @@ export default defineComponent({
                 کارمزد باسلام نسبت به قیمت نهایی فروش محصول محاسبه می‌شود.
               </div>
             </div>
+            <p class="text-xs text-gray-400 mb-2">تعیین کنید محصول شما در کدام دسته‌بندی باسلام قرار می‌گیرد.</p>
 
             <CategorySelector 
               :key="categoryKey"
