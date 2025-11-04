@@ -11,6 +11,7 @@ export default defineComponent({
     const search = ref('');
     const open = ref(false);
     const root = ref(null);
+    const isComposing = ref(false);
 
     // Sync external model changes to local search string
     watch(() => props.modelValue, (val, oldVal) => {
@@ -39,10 +40,14 @@ export default defineComponent({
       open.value = false;
     };
 
-    const onInput = () => {
-      // Make sure dropdown is visible while typing
+    const onInput = (e) => {
+      // Update search on every keystroke
+      search.value = e && e.target ? e.target.value : '';
       open.value = true;
     };
+    const onCompStart = () => { isComposing.value = true; };
+    const onCompUpdate = (e) => { isComposing.value = true; search.value = e.target.value; open.value = true; };
+    const onCompEnd = (e) => { isComposing.value = false; search.value = e.target.value; open.value = true; };
 
     const showList = computed(() => {
       const q = (search.value || '').trim();
@@ -72,16 +77,19 @@ export default defineComponent({
       document.removeEventListener('keydown', onKey);
     });
 
-    return { search, filtered, select, showList, open, root, onInput };
+    return { search, filtered, select, showList, open, root, onInput, onCompStart, onCompUpdate, onCompEnd };
   },
   template: `
     <div class="relative" ref="root">
       <input 
         type="text" 
         placeholder="جستجوی دسته‌بندی..."
-        v-model="search"
+        :value="search"
         @focus="open = true"
         @input="onInput"
+        @compositionstart="onCompStart"
+        @compositionupdate="onCompUpdate"
+        @compositionend="onCompEnd"
         autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
         class="w-full rounded-xl border border-gray-200 bg-white text-gray-900 px-3 py-2 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20"
       />
